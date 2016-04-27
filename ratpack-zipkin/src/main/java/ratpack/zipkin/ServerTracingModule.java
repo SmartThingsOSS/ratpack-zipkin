@@ -24,10 +24,7 @@ import com.google.inject.multibindings.Multibinder;
 import ratpack.guice.ConfigurableModule;
 import ratpack.handling.HandlerDecorator;
 import ratpack.server.ServerConfig;
-import ratpack.zipkin.internal.DefaultServerTracingHandler;
-import ratpack.zipkin.internal.RatpackServerClientLocalSpanState;
-import ratpack.zipkin.internal.ServerRequestAdapterFactory;
-import ratpack.zipkin.internal.ServerResponseAdapterFactory;
+import ratpack.zipkin.internal.*;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -46,6 +43,8 @@ public class ServerTracingModule extends ConfigurableModule<ServerTracingModule.
     bind(ServerTracingHandler.class).to(DefaultServerTracingHandler.class);
     Provider<ServerTracingHandler> serverTracingHandlerProviderProvider = getProvider(ServerTracingHandler.class);
     Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toProvider(() -> HandlerDecorator.prepend(serverTracingHandlerProviderProvider.get()));
+
+    bind(ZipkinHttpClient.class);
   }
 
   @Provides
