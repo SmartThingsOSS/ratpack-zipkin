@@ -1,0 +1,32 @@
+apply from: 'build.gradle'
+
+apply plugin: "maven-publish"
+
+group = "smartthings"
+version = rootProject.file('st-version.txt').text.trim()
+ext.isSnapshot = version.endsWith("SNAPSHOT")
+
+if (project.hasProperty('smartThingsArtifactoryUserName')) {
+    publishing {
+        publications {
+            main(MavenPublication) {
+                from components.java
+                artifact sourcesJar
+            }
+        }
+        repositories {
+            maven {
+                credentials {
+                    username smartThingsArtifactoryUserName
+                    password smartThingsArtifactoryPassword
+                }
+                if (isSnapshot) {
+                    url "https://smartthings.artifactoryonline.com/smartthings/libs-snapshot-local"
+                } else {
+                    url "https://smartthings.artifactoryonline.com/smartthings/libs-release-local"
+                }
+            }
+        }
+    }
+
+}
