@@ -1,0 +1,26 @@
+machine:
+  java:
+    version:
+      oraclejdk8
+
+dependencies:
+  override:
+    - ./gradlew -b smartthings.gradle classes testClasses
+
+  cache_directories:
+    - ~/.gradle
+
+test:
+  override:
+    - ./gradlew -b smartthings.gradle check
+
+deployment:
+  snapshot:
+    branch: smartthings-master
+    commands:
+      - ./gradlew -b smartthings.gradle publish -PsmartThingsArtifactoryUserName=$ARTIFACTORY_USERNAME -PsmartThingsArtifactoryPassword=$ARTIFACTORY_PASSWORD
+
+  release:
+    branch: smartthings-release
+    commands:
+      - ./gradlew -b smartthings.gradle publish -PsmartThingsArtifactoryUserName=$ARTIFACTORY_USERNAME -PsmartThingsArtifactoryPassword=$ARTIFACTORY_PASSWORD
