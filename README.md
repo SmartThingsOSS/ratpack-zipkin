@@ -4,11 +4,43 @@
 
 [Zipkin](https://twitter.github.io/zipkin/index.html) support for [Ratpack](http://www.ratpack.io).
 
-This repo is a work-in-progress for adding Zipkin support to Ratpack.
-
 Uses [Brave](https://github.com/openzipkin/brave) for the underlying Zipkin support.
 
+## Binaries
+
+Using Gradle:
+
+```
+compile 'com.github.hyleung:ratpack-zipkin:1.0.1'
+```
+
+Using Maven:
+
+```
+<dependency>
+  <groupId>com.github.hyleung</groupId>
+  <artifactId>ratpack-zipkin</artifactId>
+  <version>1.0.1</version>
+</dependency>
+```
+
 ## Getting Started
+
+### Zipkin
+
+First you'll need to (obviously) get Zipkin up and running. The quickest way to do this is using Docker and `docker-compose`.
+
+Clone [docker-zipkin](https://github.com/openzipkin/docker-zipkin)
+
+Start the Zipkin stack by running;
+
+```
+docker-compose up
+```
+
+### Ratpack
+
+#### SR/SS Spans
 
 The mimimal configuration:
 
@@ -26,18 +58,37 @@ RatpackServer.start(server -> server
 
 This should add a `HandlerDecorator` that adds server send (SS) and server receive (SS) tracing using the default settings.
 
-## Starting the example service(s)
+There's a small demo app in [ratpack-zipkin-example](https://github.com/hyleung/ratpack-zipkin-example).
 
-Start the Zipkin stack using docker-compose:
+#### CS/CR Spans 
 
-```
-cd docker-zipkin
-docker-compose up
-```
-
-
-Start ther Ratback example service:
+`ZipkinHttpClient` provides some HTTP client functionality - similar to Ratpack's own `HttpClient`. There are separate
+methods for each of the supported HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `OPTIONS`, `HEAD`). Tracing of streamed
+responses is *not* supported.
 
 ```
-gradle :example:run -DscribeHost=localhost
+@Inject ZipkinHttpClient client
+...
+client.get(new URI("http://example.com", requestSpec -> ...))
+    ... 
 ```
+
+The underlying implementation is just a wrapper that delegates most of the work to a standard Ratpack `HttpClient` - 
+just adds a little bit of instrumentation around the client request/response. Eventually, the hope is that this custom
+Http client will go away, but that requires some extra hooks the normal Ratpack HTTP client.
+
+#### Local Spans
+
+For local spans, use the normal Brave `LocalTracer`:
+
+```
+@Inject LocalTracer tracer
+
+...
+tracer.startNewSpan("My component", "an operation");
+...
+tracer.finishSpan();
+```
+
+Currently nested local spans don't work - but hopefully soon!
+
