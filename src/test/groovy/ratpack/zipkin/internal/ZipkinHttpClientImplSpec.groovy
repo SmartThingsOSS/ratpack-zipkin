@@ -125,4 +125,50 @@ class ZipkinHttpClientImplSpec extends Specification {
         HttpMethod.PATCH  | _
         HttpMethod.OPTIONS | _
     }
+
+    def "get() should be traced"() {
+        when:
+        ExecResult<ReceivedResponse> rs = execHarness.yield { e ->
+            zipkinHttpClient.get(uri, action)
+        }
+
+        then:
+        rs.isSuccess()
+        rs.value == receivedResponse
+        1 * httpClient.request(_, _) >> { URI u, Action<? super RequestSpec> a ->
+            assert u == uri
+            a.execute(requestSpec)
+            return Promise.value(receivedResponse)
+        }
+        1 * requestSpec.get() >> requestSpec
+        1 * requestSpec.method(HttpMethod.GET) >> requestSpec
+        1 * requestAdapterFactory.createAdaptor(requestSpec, HttpMethod.GET.name) >> clientRequestAdapter
+        1 * requestInterceptor.handle(clientRequestAdapter)
+        1 * responseAdapterFactory.createAdapter(receivedResponse) >> clientResponseAdapter
+        1 * responseInterceptor.handle(clientResponseAdapter)
+        0 * _
+    }
+
+    def "post() should be traced"() {
+        when:
+        ExecResult<ReceivedResponse> rs = execHarness.yield { e ->
+            zipkinHttpClient.post(uri, action)
+        }
+
+        then:
+        rs.isSuccess()
+        rs.value == receivedResponse
+        1 * httpClient.request(_, _) >> { URI u, Action<? super RequestSpec> a ->
+            assert u == uri
+            a.execute(requestSpec)
+            return Promise.value(receivedResponse)
+        }
+        1 * requestSpec.post() >> requestSpec
+        1 * requestSpec.method(HttpMethod.POST) >> requestSpec
+        1 * requestAdapterFactory.createAdaptor(requestSpec, HttpMethod.POST.name) >> clientRequestAdapter
+        1 * requestInterceptor.handle(clientRequestAdapter)
+        1 * responseAdapterFactory.createAdapter(receivedResponse) >> clientResponseAdapter
+        1 * responseInterceptor.handle(clientResponseAdapter)
+        0 * _
+    }
 }

@@ -7,5 +7,5 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@BindingAnnotation @Target({ElementType.PARAMETER}) @Retention(RetentionPolicy.RUNTIME)
+@BindingAnnotation @Target({ElementType.PARAMETER, ElementType.FIELD}) @Retention(RetentionPolicy.RUNTIME)
 public @interface Zipkin {}
