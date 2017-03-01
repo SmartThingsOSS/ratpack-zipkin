@@ -28,6 +28,7 @@ import ratpack.http.client.RequestSpec;
 
 import java.util.Collection;
 import java.util.Collections;
+import zipkin.TraceKeys;
 
 class RatpackClientRequestAdapter implements ClientRequestAdapter {
   private final RequestSpec requestSpec;
@@ -65,7 +66,7 @@ class RatpackClientRequestAdapter implements ClientRequestAdapter {
 
   @Override
   public Collection<KeyValueAnnotation> requestAnnotations() {
-    return Collections.singletonList(KeyValueAnnotation.create("http.uri", requestSpec.getUri().toString()));
+    return Collections.singletonList(KeyValueAnnotation.create(TraceKeys.HTTP_URL, requestSpec.getUri().toString()));
   }
 
   @Override
