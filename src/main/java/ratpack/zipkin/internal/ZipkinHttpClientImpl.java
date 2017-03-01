@@ -97,12 +97,12 @@ public class ZipkinHttpClientImpl implements HttpClient {
 
     @Override
     public Promise<ReceivedResponse> get(final URI uri, final Action<? super RequestSpec> requestConfigurer) {
-        return delegate.get(uri, requestConfigurer);
+        return request(uri, requestConfigurer.prepend(RequestSpec::get));
     }
 
     @Override
     public Promise<ReceivedResponse> post(final URI uri, final Action<? super RequestSpec> requestConfigurer) {
-        return delegate.post(uri, requestConfigurer);
+        return request(uri, requestConfigurer.prepend(RequestSpec::post));
     }
 
     private Action<? super RequestSpec> tracedRequestAction(final Action<? super RequestSpec> action) {
