@@ -1,19 +1,30 @@
 package ratpack.zipkin.internal;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import ratpack.func.Action;
 import ratpack.func.Function;
 import ratpack.http.HttpMethod;
 import ratpack.http.MutableHeaders;
+import ratpack.http.Request;
 import ratpack.http.client.ReceivedResponse;
 import ratpack.http.client.RequestSpec;
+import ratpack.http.internal.NettyHeadersBackedMutableHeaders;
 
 import javax.net.ssl.SSLContext;
+import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.time.Duration;
 
 public class MethodCapturingRequestSpec implements RequestSpec {
 
+    private final RequestSpec actualSpec;
     private HttpMethod capturedMethod = null;
+
+    public MethodCapturingRequestSpec(RequestSpec spec) {
+        this.actualSpec = spec;
+    }
 
     @Override
     public RequestSpec redirects(int maxRedirects) {
@@ -32,7 +43,7 @@ public class MethodCapturingRequestSpec implements RequestSpec {
 
     @Override
     public MutableHeaders getHeaders() {
-        return null;
+        return new NettyHeadersBackedMutableHeaders(new DefaultHttpHeaders());
     }
 
     @Override
@@ -58,7 +69,7 @@ public class MethodCapturingRequestSpec implements RequestSpec {
 
     @Override
     public URI getUri() {
-        return null;
+        return actualSpec.getUri();
     }
 
     @Override
@@ -73,7 +84,7 @@ public class MethodCapturingRequestSpec implements RequestSpec {
 
     @Override
     public Body getBody() {
-        return null;
+        return new NoopBodyImpl();
     }
 
     @Override
@@ -83,5 +94,37 @@ public class MethodCapturingRequestSpec implements RequestSpec {
 
     public HttpMethod getCapturedMethod() {
         return capturedMethod;
+    }
+
+    private class NoopBodyImpl implements Body {
+        @Override
+        public Body type(String contentType) {
+            return this;
+        }
+
+        @Override
+        public Body stream(Action<? super OutputStream> action) throws Exception {
+            return this;
+        }
+
+        @Override
+        public Body buffer(ByteBuf byteBuf) {
+            return this;
+        }
+
+        @Override
+        public Body bytes(byte[] bytes) {
+            return this;
+        }
+
+        @Override
+        public Body text(CharSequence text) {
+            return this;
+        }
+
+        @Override
+        public Body text(CharSequence text, Charset charset) {
+            return this;
+        }
     }
 }
