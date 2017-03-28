@@ -29,7 +29,8 @@ class RatpackServiceClientLocalSpanStateSpec extends Specification {
     def RatpackServerClientLocalSpanState.MDCProxy mdc = Mock(RatpackServerClientLocalSpanState.MDCProxy)
     def setup() {
         def registry = SimpleMutableRegistry.newInstance()
-       spanState = new RatpackServerClientLocalSpanState("some-service-name", 0, 8080, { registry }, mdc)
+        def endpoint = Endpoint.builder().serviceName("some-service-name").ipv4(0).port(8080).build()
+        spanState = new RatpackServerClientLocalSpanState(endpoint, { registry }, mdc)
     }
 
     def 'Should return server endpoint'() {
@@ -39,9 +40,7 @@ class RatpackServiceClientLocalSpanStateSpec extends Specification {
             def expectedPort = 1234
             spanState = new RatpackServerClientLocalSpanState(expectedServiceName,
                     expectedIp,
-                    expectedPort,
-                    {SimpleMutableRegistry.newInstance()},
-                    mdc)
+                    expectedPort)
 
             def expected = Endpoint.create(expectedServiceName, expectedIp, expectedPort)
         when:
