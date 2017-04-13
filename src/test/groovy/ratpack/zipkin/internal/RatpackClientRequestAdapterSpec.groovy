@@ -23,6 +23,7 @@ import com.github.kristofa.brave.http.SpanNameProvider
 import ratpack.http.MutableHeaders
 import ratpack.http.client.RequestSpec
 import spock.lang.Specification
+import zipkin.TraceKeys
 
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -57,7 +58,7 @@ class RatpackClientRequestAdapterSpec extends Specification {
         when:
             def result = adapter.requestAnnotations()
         then:
-            assertThat(result).contains(KeyValueAnnotation.create("http.uri", expected.toString()))
+            assertThat(result).contains(KeyValueAnnotation.create(TraceKeys.HTTP_URL, expected.toString()))
     }
 
     def 'When span id is null, should add "X-B3-Sampled" header with value 0'() {

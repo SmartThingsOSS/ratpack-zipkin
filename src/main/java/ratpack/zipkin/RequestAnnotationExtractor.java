@@ -16,14 +16,18 @@
 package ratpack.zipkin;
 
 import com.github.kristofa.brave.KeyValueAnnotation;
+import java.util.Arrays;
 import ratpack.http.Request;
 
 import java.util.Collection;
 import java.util.Collections;
+import zipkin.TraceKeys;
 
 @FunctionalInterface
 public interface RequestAnnotationExtractor {
   Collection<KeyValueAnnotation> annotationsForRequest(Request request);
 
-  RequestAnnotationExtractor DEFAULT = (request -> Collections.emptyList());
+  RequestAnnotationExtractor DEFAULT = (request -> Collections.singletonList(
+      KeyValueAnnotation.create(TraceKeys.HTTP_URL, request.getPath())));
+
 }
